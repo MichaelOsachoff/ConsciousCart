@@ -3,14 +3,14 @@ const { MongoClient } = require('mongodb');
 
 const country = 'canada';
 const openFoodFactsBaseURL = 'https://world.openfoodfacts.net/api/v2/search';
-const mongoURI = 'mongodb://localhost:27017/tempdb';
+const mongoURI = 'mongodb://localhost:27017/ConsciousCart';
 
 async function fetchAndStoreData() {
   const client = new MongoClient(mongoURI, { useUnifiedTopology: true });
 
   try {
     await client.connect();
-    const database = client.db('tempdb');
+    const database = client.db('ConsciousCart');
     const collection = database.collection('Products');
 
     let page = 1;
