@@ -163,7 +163,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
             itemCount: availableIngredients.length,
             itemBuilder: (context, index) {
               return ListTile(
-                title: Text("Name:${availableIngredients[index].name} - Quantity:${availableIngredients[index].quantity}"),
+                title: Text("${availableIngredients[index].name} - ${availableIngredients[index].quantity}"),
                 onTap: () {
                   setState(() {
                     selectedIngredients.add(availableIngredients[index]);
