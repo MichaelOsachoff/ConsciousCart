@@ -21,4 +21,4 @@ It is free and open to use database under the Open Database License (OBDL) - [Mo
 Products for this project are contained to only Canada instead of the full database set provided by Open Food Facts. This includes roughly 83760 products within a MongoDB database, with a fetch and creation time of up to an hour. See the dbFetch.js file for implementation of this process.
 
 ## Installation Requirements
-Mongo, Node, Express, Mongoose, Cors
+Mongo, Node, Express, Mongoose, Cors, Flutter, Android Studio
