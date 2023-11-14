@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Conscious Cart',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         ),
         home: ConsciousCart(),
       ),

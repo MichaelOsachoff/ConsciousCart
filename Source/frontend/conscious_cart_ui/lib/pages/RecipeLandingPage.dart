@@ -1,8 +1,13 @@
 import 'package:conscious_cart_ui/models/Packaging.dart';
-import 'package:conscious_cart_ui/models/Product.dart';
+import 'package:conscious_cart_ui/models/Ingredient.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+const colourDefault = Color(0xFF000000);
+const colourBad = Color(0xFFC20000);
+const colourOkay = Color(0xFFC26E00);
+const colourGood = Color(0xFF00C21D);
 
 class RecipeLandingPage extends StatefulWidget {
   @override
@@ -11,11 +16,19 @@ class RecipeLandingPage extends StatefulWidget {
 
 class _RecipeLandingPageState extends State<RecipeLandingPage> {
   bool _isFormVisible = false;
-  List<Product> availableIngredients = [];
 
-  List<Product> selectedIngredients = [];
+  String recipeName = '';
+
   String searchTerm = '';
+  List<Ingredient> availableIngredients = [];
+  List<Ingredient> selectedIngredients = [];
+  bool hasSearched = false;
 
+  double totalRecipeScore = 0;
+  String totalRecipeScoreString = '';
+  Color totalRecipeScoreColour = colourDefault;
+
+  //API CALLS
   Future<void> fetchAvailableIngredients() async {
     final response = await http
         .get(Uri.parse('http://localhost:3000/products?search=$searchTerm'));
@@ -25,33 +38,28 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
       final List<dynamic> responseData = json.decode(response.body);
 
       //This is one of the worst data processing functions I have ever written. Don't use this
-      List<Product> responseProducts = [];
+      List<Ingredient> responseProducts = [];
       for (var response in responseData) {
         List<Packaging> tempPackageList = [];
         for (var package in response["packages"]) {
           var tempPackage = Packaging(
             package["ecoscoreMaterialScore"] ?? 0,
             package["material"] ?? "",
-            package["weightMeasured"] ?? 0,
+            package["weightMeasured"]?.toDouble() ?? 0,
             package["numberOfUnits"] ?? "",
             package["nonRecyclableAndNonBiodegradable"] ?? "",
             package["recycling"] ?? "",
+            package["shape"] ?? "",
           );
           tempPackageList.add(tempPackage);
         }
-        double packagingScore;
-        if (response["packagingScore"] == null) {
-          packagingScore = 0.0;
-        } else {
-          packagingScore = response["packagingScore"].toDouble();
-        }
-        var tempProduct = Product(
+        var tempProduct = Ingredient(
           response["id"] ?? "",
           response["name"] ?? "",
           response["quantity"] ?? "",
           response["servingSize"] ?? "",
           response["warning"] ?? "",
-          packagingScore,
+          response["packagingScore"]?.toDouble() ?? 0.0,
           response["numberNonRecyclableAndNonBiodegradableMaterials"] ?? 0,
           tempPackageList,
         );
@@ -66,8 +74,43 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
       throw Exception(
           'Failed to load data, status code: ${response.statusCode}');
     }
+    hasSearched = true;
   }
 
+  Future<void> submitRecipe() async {
+    if (selectedIngredients.isEmpty) {
+      return;
+    }
+    final List<Map<String, dynamic>> recipeData =
+        selectedIngredients.map((ingredient) => ingredient.toJson()).toList();
+
+    // Generate the current date
+    DateTime currentDate = DateTime.now();
+
+    // Convert the date to a string in a format suitable for your backend
+    String formattedDate = currentDate.toIso8601String();
+
+    final response = await http.post(
+      Uri.parse(
+          'http://localhost:3000/submitRecipe'), // Replace with your backend URL
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'recipeName': recipeName,
+        'totalRecipeScore': totalRecipeScore,
+        'dateOfCreation': formattedDate,
+        'ingredients': recipeData
+      }),
+    );
+    if (response.statusCode == 200) {
+      print('Recipe sent to backend successfully!');
+      // Optionally, you can handle the response from the backend
+    } else {
+      print('Failed to send recipe, status code: ${response.statusCode}');
+      // Handle the error
+    }
+  }
+
+  //BUILDING FUNCTIONS
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,6 +122,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
   }
 
   Widget _buildButton() {
+    resetCreateRecipePage();
     return Center(
       child: ElevatedButton(
         onPressed: () {
@@ -107,6 +151,37 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+              width: 40, // Adjust the size as needed
+              height: 40, // Adjust the size as needed
+              decoration: BoxDecoration(
+                shape: BoxShape
+                    .circle, // or BoxShape.rectangle for a rounded rectangle
+                color: Theme.of(context).primaryColor,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _isFormVisible = false;
+                  });
+                },
+              )),
+          Row(
+            children: [
+              Text(
+                'Recipe Name:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Expanded(child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    recipeName = value;
+                  });
+                },
+              )),
+            ],
+          ),
           Text(
             'Ingredients',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -120,11 +195,19 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total Waste Score: 0'),
+              Row(
+                children: [
+                  Text('Total Waste Score: ',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('$totalRecipeScoreString($totalRecipeScore)',
+                      style: TextStyle(color: totalRecipeScoreColour)),
+                ],
+              ),
               ElevatedButton(
                 onPressed: () {
                   setState(() {
                     _isFormVisible = false;
+                    submitRecipe();
                   });
                 },
                 child: Text('Done'),
@@ -149,6 +232,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
             onChanged: (value) {
               setState(() {
                 searchTerm = value;
+                availableIngredients = [];
               });
             },
           )),
@@ -158,20 +242,30 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
         ]),
         SizedBox(
           height: 200, // Set the desired height for the list
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: availableIngredients.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text("${availableIngredients[index].name} - ${availableIngredients[index].quantity}"),
-                onTap: () {
-                  setState(() {
-                    selectedIngredients.add(availableIngredients[index]);
-                  });
-                },
-              );
-            },
-          ),
+          child: hasSearched
+              ? availableIngredients.isEmpty
+                  ? Center(
+                      child: Text('No products found'),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: availableIngredients.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(
+                              "${availableIngredients[index].name} - ${availableIngredients[index].quantity}"),
+                          onTap: () {
+                            setState(() {
+                              selectedIngredients
+                                  .add(availableIngredients[index]);
+                              totalRecipeScore = calculateTotalRecipeScore(
+                                  selectedIngredients);
+                            });
+                          },
+                        );
+                      },
+                    )
+              : Container(), // Empty container when searchTerm is empty
         ),
       ],
     );
@@ -183,12 +277,14 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
       children: selectedIngredients.map((ingredient) {
         return Row(
           children: [
-            Text(ingredient.name),
+            Text("${ingredient.name} - ${ingredient.quantity}"),
             Spacer(),
             ElevatedButton(
               onPressed: () {
                 setState(() {
                   selectedIngredients.remove(ingredient);
+                  totalRecipeScore =
+                      calculateTotalRecipeScore(selectedIngredients);
                 });
               },
               child: Text('X'),
@@ -197,5 +293,46 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
         );
       }).toList(),
     );
+  }
+
+  //UTILITY FUNCTIONS
+  double calculateTotalRecipeScore(List<Ingredient> ingredients) {
+    if (ingredients.isEmpty) {
+      totalRecipeScoreString = 'Okay';
+      totalRecipeScoreColour = colourDefault;
+      return 0;
+    }
+
+    double totalScore = 0;
+    for (Ingredient ingredient in ingredients) {
+      if (ingredient.warning != "packaging_data_missing") {
+        totalScore += ingredient.packagingScore;
+      }
+    }
+
+    double averageScore = totalScore / ingredients.length;
+    averageScore = double.parse(averageScore.toStringAsFixed(2));
+    if (averageScore < 0) {
+      totalRecipeScoreString = 'Bad';
+      totalRecipeScoreColour = colourBad;
+    } else if (averageScore < 50) {
+      totalRecipeScoreString = 'Okay';
+      totalRecipeScoreColour = colourOkay;
+    } else {
+      totalRecipeScoreString = 'Good';
+      totalRecipeScoreColour = colourGood;
+    }
+
+    return averageScore;
+  }
+
+  void resetCreateRecipePage() {
+    availableIngredients = [];
+    selectedIngredients = [];
+    hasSearched = false;
+    recipeName = '';
+    totalRecipeScore = 0;
+    totalRecipeScoreString = '';
+    totalRecipeScoreColour = colourDefault;
   }
 }

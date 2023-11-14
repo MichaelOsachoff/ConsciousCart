@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "conscious_cart_ui",
+            "cwd": "C:\\SPB_Data\\ConsciousCartSource\\frontend\\conscious_cart_ui",
+            "request": "launch",
+            "type": "dart",
+            "args": ["-f", "input_filename"]
+        },
+        {
+            "name": "conscious_cart_ui (profile mode)",
+            "cwd": "C:\\SPB_Data\\ConsciousCartSource\\frontend\\conscious_cart_ui",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": ["-f", "input_filename"]
+        },
+        {
+            "name": "conscious_cart_ui (release mode)",
+            "cwd": "C:\\SPB_Data\\ConsciousCartSource\\frontend\\conscious_cart_ui",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": ["-f", "input_filename"]
+        }
+    ]
+}

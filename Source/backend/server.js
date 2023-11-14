@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { productSchema } = require("./models/productSchema");
+const { ingredientSchema } = require("./models/ingredientSchema");
 
 const app = express();
 const PORT = 3000; // You can use any available port
@@ -14,17 +16,14 @@ mongoose.connect("mongodb://localhost:27017/ConsciousCart", {
   useUnifiedTopology: true,
 });
 
-// MongoDB Schema
-const productSchema = new mongoose.Schema({
-  _id: String,
-  _keywords: [String],
-  abbreviated_product_name: String,
-  brands: String,
-  brands_tags: [String],
-  // Other fields as per your requirement
-});
-
+//Models
 const Product = mongoose.model("Products", productSchema);
+const Recipe = mongoose.model("Recipes", {
+  recipeName: String,
+  totalRecipeScore: Number,
+  dateOfCreation: { type: Date, default: Date.now },
+  ingredients: [ingredientSchema],
+});
 
 // API Endpoints
 app.get("/products", async (req, res) => {
@@ -48,6 +47,91 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.post("/submitRecipe", async (req, res) => {
+  try {
+    const recipeData = req.body.ingredients;
+    const totalRecipeScore = req.body.totalRecipeScore;
+    const recipeName = req.body.recipeName;
+    const dateOfCreation = req.body.dateOfCreation;
+    const recipe = new Recipe({
+      recipeName: recipeName,
+      totalRecipeScore: totalRecipeScore,
+      dateOfCreation: dateOfCreation,
+      ingredients: recipeData,
+    });
+    await recipe.save();
+
+    res.status(200).json({ message: "Recipe saved successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// GET endpoint to retrieve all recipes
+app.get("/getRecipes", async (req, res) => {
+  try {
+    const recipes = await Recipe.find().exec();
+    res.json(recipes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const User = mongoose.model("Users", {
+  name: String,
+  username: String,
+  email: String,
+  password: String,
+});
+
+app.get("/getUserData", async (req, res) => {
+  try {
+    const user = await User.findOne().exec();
+
+    if (!user) {
+      // No user found, return an empty response
+      return res.status(200).json({});
+    }
+
+    res.json({
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      password: user.password,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/updateUserData", async (req, res) => {
+  try {
+    const { name, username, email, password } = req.body;
+
+    // Assuming there is only one user in the database
+    const user = await User.findOne().exec();
+
+    if (!user) {
+      // No user found, create a new user
+      const newUser = new User({ name, username, email, password });
+      await newUser.save();
+    } else {
+      // Update existing user
+      user.name = name;
+      user.username = username;
+      user.email = email;
+      user.password = password;
+      await user.save();
+    }
+
+    res.status(200).json({ message: "User data updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
@@ -67,6 +151,7 @@ function extractProduct(item, index, arr) {
       nonRecyclableAndNonBiodegradable:
         package["non_recyclable_and_non_biodegradable"],
       recycling: package["recycling"],
+      shape: package["shape"],
     };
     extractedPackagesList.push(extractedPackage);
   });
