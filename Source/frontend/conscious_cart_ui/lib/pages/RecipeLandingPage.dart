@@ -61,6 +61,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
           response["warning"] ?? "",
           response["packagingScore"]?.toDouble() ?? 0.0,
           response["numberNonRecyclableAndNonBiodegradableMaterials"] ?? 0,
+          response["imageUrl"] ?? "",
           tempPackageList,
         );
         responseProducts.add(tempProduct);
@@ -123,151 +124,194 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
 
   Widget _buildButton() {
     resetCreateRecipePage();
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _isFormVisible = true;
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.all(20),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('New Recipe', style: TextStyle(fontSize: 20)),
-            Icon(Icons.add, size: 30),
-          ],
+    return SingleChildScrollView(
+      child: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _isFormVisible = true;
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.all(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('New Recipe', style: TextStyle(fontSize: 20)),
+              Icon(Icons.add, size: 30),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildForm() {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-              width: 40, // Adjust the size as needed
-              height: 40, // Adjust the size as needed
-              decoration: BoxDecoration(
-                shape: BoxShape
-                    .circle, // or BoxShape.rectangle for a rounded rectangle
-                color: Theme.of(context).primaryColor,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    _isFormVisible = false;
-                  });
-                },
-              )),
-          Row(
-            children: [
-              Text(
-                'Recipe Name:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Expanded(child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    recipeName = value;
-                  });
-                },
-              )),
-            ],
-          ),
-          Text(
-            'Ingredients',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          _buildIngredientSearch(),
-          SizedBox(height: 16),
-          _buildSelectedIngredients(),
-          SizedBox(height: 16),
-          // Total Waste Score & Done Button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text('Total Waste Score: ',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text('$totalRecipeScoreString($totalRecipeScore)',
-                      style: TextStyle(color: totalRecipeScoreColour)),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isFormVisible = false;
-                    submitRecipe();
-                  });
-                },
-                child: Text('Done'),
-              ),
-            ],
-          ),
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+                width: 40, // Adjust the size as needed
+                height: 40, // Adjust the size as needed
+                decoration: BoxDecoration(
+                  shape: BoxShape
+                      .circle, // or BoxShape.rectangle for a rounded rectangle
+                  color: Theme.of(context).primaryColor,
+                ),
+                child: IconButton(
+                  icon:
+                      const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                  onPressed: () {
+                    setState(() {
+                      _isFormVisible = false;
+                    });
+                  },
+                )),
+            Row(
+              children: [
+                Text(
+                  'Recipe Name:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Expanded(child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      recipeName = value;
+                    });
+                  },
+                )),
+              ],
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Ingredients',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            
+            _buildIngredientSearch(),
+            SizedBox(height: 16),
+            _buildSelectedIngredients(),
+            SizedBox(height: 16),
+            // Total Waste Score & Done Button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text('Total Waste Score: ',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('$totalRecipeScoreString($totalRecipeScore)',
+                        style: TextStyle(color: totalRecipeScoreColour)),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _isFormVisible = false;
+                      submitRecipe();
+                    });
+                  },
+                  child: Text('Done'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildIngredientSearch() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(children: [
-          Expanded(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Expanded(
               child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search ingredients...',
+                decoration: InputDecoration(
+                  hintText: 'Search ingredients...',
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchTerm = value;
+                    availableIngredients = [];
+                  });
+                },
+              ),
             ),
-            onChanged: (value) {
-              setState(() {
-                searchTerm = value;
-                availableIngredients = [];
-              });
-            },
-          )),
-          IconButton(
+            IconButton(
               onPressed: fetchAvailableIngredients,
-              icon: Icon(Icons.search_rounded))
-        ]),
-        SizedBox(
-          height: 200, // Set the desired height for the list
-          child: hasSearched
-              ? availableIngredients.isEmpty
-                  ? Center(
-                      child: Text('No products found'),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: availableIngredients.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(
-                              "${availableIngredients[index].name} - ${availableIngredients[index].quantity}"),
-                          onTap: () {
-                            setState(() {
-                              selectedIngredients
-                                  .add(availableIngredients[index]);
-                              totalRecipeScore = calculateTotalRecipeScore(
-                                  selectedIngredients);
-                            });
-                          },
-                        );
-                      },
-                    )
-              : Container(), // Empty container when searchTerm is empty
-        ),
-      ],
+              icon: Icon(Icons.search_rounded),
+            )
+          ]),
+          SizedBox(
+            height: 400, // Set the desired height for the list
+            child: hasSearched
+                ? availableIngredients.isEmpty
+                    ? Center(
+                        child: Text('No products found'),
+                      )
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: availableIngredients.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  contentPadding:
+                                      EdgeInsets.all(0), // Remove default padding
+                                  title: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      availableIngredients[index].imageUrl != ""
+                                          ? _fetchImage(
+                                              availableIngredients[index]
+                                                  .imageUrl)
+                                          : Placeholder(
+                                              fallbackWidth: 50,
+                                              fallbackHeight: 50,
+                                            ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal:
+                                                  8.0), // Adjust padding as needed
+                                          child: Text(
+                                            "${availableIngredients[index].name} (${availableIngredients[index].quantity})",
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedIngredients
+                                          .add(availableIngredients[index]);
+                                      totalRecipeScore =
+                                          calculateTotalRecipeScore(
+                                              selectedIngredients);
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      )
+                : Container(), // Empty container when searchTerm is empty
+          ),
+        ],
+      ),
     );
   }
 
@@ -292,6 +336,37 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
           ],
         );
       }).toList(),
+    );
+  }
+
+  Widget _fetchImage(String url) {
+    return Image.network(
+      url,
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          // If the image is fully loaded, return the Image widget
+          return child;
+        } else {
+          // If the image is still loading, you can show a loading indicator
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        // If there's an error loading the image, you can display a placeholder or an error message
+        return Placeholder(
+          fallbackWidth: 50,
+          fallbackHeight: 50,
+        ); // Placeholder widget can be replaced with your custom error widget
+      },
     );
   }
 

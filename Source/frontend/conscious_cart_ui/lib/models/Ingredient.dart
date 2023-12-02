@@ -8,6 +8,7 @@ class Ingredient {
   String warning;
   double packagingScore;
   int numberNonRecyclableAndNonBiodegradableMaterials;
+  String imageUrl;
   List<Packaging> packages;
 
   Ingredient(
@@ -18,6 +19,7 @@ class Ingredient {
       this.warning,
       this.packagingScore,
       this.numberNonRecyclableAndNonBiodegradableMaterials,
+      this.imageUrl,
       this.packages);
 
   Map<String, dynamic> toJson() {
@@ -30,6 +32,7 @@ class Ingredient {
       'packagingScore': packagingScore,
       'numberNonRecyclableAndNonBiodegradableMaterials':
           numberNonRecyclableAndNonBiodegradableMaterials,
+      'imageUrl': imageUrl,
       'packages': packages.map((package) => package.toJson()).toList(),
     };
   }
@@ -55,6 +58,7 @@ class Ingredient {
       map['warning'] ?? '',
       map['packagingScore']?.toDouble() ?? 0.0,
       map['numberNonRecyclableAndNonBiodegradableMaterials'] ?? 0,
+      map['imageUrl'] ?? '',
       parsedPackages,
     );
   }

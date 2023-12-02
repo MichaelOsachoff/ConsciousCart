@@ -37,7 +37,7 @@ app.get("/products", async (req, res) => {
           { _keywords: { $regex: searchTerm, $options: "i" } },
         ],
       },
-      "product_name quantity serving_size ecoscore_data"
+      "product_name quantity serving_size ecoscore_data image_front_thumb_url"
     ).exec();
     const extractedProductsList = extractProductInformation(products);
 
@@ -156,6 +156,8 @@ function extractProduct(item, index, arr) {
     extractedPackagesList.push(extractedPackage);
   });
 
+  const image_url = item["_doc"]["image_front_thumb_url"];
+
   const extractedProduct = {
     id: item["_id"],
     name: item["_doc"]["product_name"],
@@ -169,6 +171,10 @@ function extractProduct(item, index, arr) {
       item["_doc"]["ecoscore_data"]["adjustments"]["packaging"][
         "non_recyclable_and_non_biodegradable_materials"
       ],
+    imageUrl: image_url ? item["_doc"]["image_front_thumb_url"].replace(
+      "openfoodfacts.net",
+      "openfoodfacts.org"
+    ) : "",
     packages: extractedPackagesList,
   };
   return extractedProduct;
