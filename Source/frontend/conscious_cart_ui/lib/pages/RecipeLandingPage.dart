@@ -45,7 +45,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
           var tempPackage = Packaging(
             package["ecoscoreMaterialScore"] ?? 0,
             package["material"] ?? "",
-            package["weightMeasured"]?.toDouble() ?? 0,
+            parseWeight(package["weight_measured"]),
             package["numberOfUnits"] ?? "",
             package["nonRecyclableAndNonBiodegradable"] ?? "",
             package["recycling"] ?? "",
@@ -192,7 +192,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
               'Ingredients',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            
+
             _buildIngredientSearch(),
             SizedBox(height: 16),
             _buildSelectedIngredients(),
@@ -204,9 +204,9 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
                 Row(
                   children: [
                     Text('Total Waste Score: ',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                     Text('$totalRecipeScoreString($totalRecipeScore)',
-                        style: TextStyle(color: totalRecipeScoreColour)),
+                        style: TextStyle(color: totalRecipeScoreColour, fontSize: 18)),
                   ],
                 ),
                 ElevatedButton(
@@ -216,7 +216,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
                       submitRecipe();
                     });
                   },
-                  child: Text('Done'),
+                  child: Text('Done', style: TextStyle(fontSize: 18)),
                 ),
               ],
             ),
@@ -228,7 +228,7 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
 
   Widget _buildIngredientSearch() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
+      padding: const EdgeInsets.fromLTRB(100, 0, 100, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -267,10 +267,11 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
                               itemCount: availableIngredients.length,
                               itemBuilder: (context, index) {
                                 return ListTile(
-                                  contentPadding:
-                                      EdgeInsets.all(0), // Remove default padding
+                                  contentPadding: EdgeInsets.all(
+                                      0), // Remove default padding
                                   title: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       availableIngredients[index].imageUrl != ""
                                           ? _fetchImage(
@@ -399,6 +400,16 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
     }
 
     return averageScore;
+  }
+
+  double parseWeight(dynamic value) {
+    if (value is double) {
+      return value;
+    } else if (value is String) {
+      return double.tryParse(value) ?? 0;
+    } else {
+      return 0;
+    }
   }
 
   void resetCreateRecipePage() {

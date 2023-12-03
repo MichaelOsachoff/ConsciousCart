@@ -1,6 +1,8 @@
 import 'package:conscious_cart_ui/models/Recipe.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 const colourBad = Color(0xFFC20000);
@@ -163,22 +165,38 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
                   },
                 ),
               ),
-              Row(
-                children: [
-                  Text('Name: ',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(recipe.recipeName, style: TextStyle(fontSize: 20)),
-                ],
-              ),
-              Row(
-                children: [
-                  Text('Date: ',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(recipe.formattedDate, style: TextStyle(fontSize: 20)),
-                ],
-              ),
+              RichText(
+                  text: TextSpan(
+                      text: 'Name: ',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      children: <TextSpan>[
+                    TextSpan(
+                      text: recipe.recipeName,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ])),
+              RichText(
+                  text: TextSpan(
+                      text: 'Date: ',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      children: <TextSpan>[
+                    TextSpan(
+                      text: recipe.formattedDate,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ])),
               SizedBox(height: 16),
               Text(
                 'Ingredients:',
@@ -219,11 +237,46 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
                         ),
                         children: <Widget>[
                           if (ingredient.warning == "packaging_data_missing")
-                            TextField(
-                              controller: TextEditingController(
-                                  text:
-                                      'No package data available for this ingredient.'),
-                              readOnly: true,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'No package data available for this ingredient.',
+                                  style: TextStyle(
+                                      fontSize:
+                                          16), // Adjust the font size as needed
+                                ),
+                                SizedBox(
+                                    height:
+                                        4), // Add some space between the text and the link
+                                RichText(
+                                  text: TextSpan(
+                                    text:
+                                        'If you have information regarding the packaging, you can add it on ',
+                                    style: TextStyle(
+                                      fontSize:
+                                          16, // Set the font size for the entire RichText
+                                      color: Colors
+                                          .black, // Set the color of the non-link text
+                                    ),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: 'OpenFoodFacts',
+                                        style: TextStyle(
+                                          color: Colors.blue, // Set link color
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            // Add the URL you want to open
+                                            _launchUrl(
+                                                'https://world.openfoodfacts.org/help-complete-products');
+                                          },
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
                             )
                           else
                             ListTile(
@@ -290,18 +343,23 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
                 },
               ),
               SizedBox(height: 16),
-              Row(
-                children: [
-                  Text('Total Waste Score: ',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(
-                      '${getScoreString(recipe.totalRecipeScore)}(${recipe.totalRecipeScore})',
+              RichText(
+                  text: TextSpan(
+                      text: 'Total Waste Score: ',
                       style: TextStyle(
                           fontSize: 20,
-                          color: getScoreColor(recipe.totalRecipeScore))),
-                ],
-              )
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      children: <TextSpan>[
+                    TextSpan(
+                      text: '${getScoreString(recipe.totalRecipeScore)}(${recipe.totalRecipeScore})',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.normal,
+                        color: getScoreColor(recipe.totalRecipeScore)
+                      ),
+                    ),
+                  ])),
             ],
           ),
         ),
@@ -350,5 +408,11 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
       return Text('High', style: TextStyle(color: colourBad));
     }
     return Text('Low', style: TextStyle(color: colourGood));
+  }
+
+  Future<void> _launchUrl(url) async {
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
+    }
   }
 }
