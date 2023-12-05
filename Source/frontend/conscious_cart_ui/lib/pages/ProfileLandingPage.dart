@@ -8,31 +8,25 @@ class ProfileLandingPage extends StatefulWidget {
 }
 
 class _ProfileLandingPageState extends State<ProfileLandingPage> {
-  // Initial values
   String name = '';
   String username = '';
   String email = '';
   String password = '';
 
-  // Controller for editable text fields
   TextEditingController nameController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  // Variable to track the current state
   bool isEditing = false;
   bool showPassword = false;
 
   @override
   void initState() {
     super.initState();
-
-    // Fetch user data when the widget initializes
     fetchUserData();
   }
 
-  // Method to fetch user data from the backend
   Future<void> fetchUserData() async {
     try {
       final response =
@@ -47,22 +41,18 @@ class _ProfileLandingPageState extends State<ProfileLandingPage> {
           password = userData['password'];
         });
 
-        // Set initial values in controllers
         nameController.text = name;
         usernameController.text = username;
         emailController.text = email;
         passwordController.text = password;
       } else {
-        // Handle error
         print('Failed to load user data');
       }
     } catch (e) {
-      // Handle exception
       print('Error: $e');
     }
   }
 
-  // Method to update user data on the backend
   Future<void> updateUserData() async {
     try {
       final response = await http.post(
@@ -79,11 +69,9 @@ class _ProfileLandingPageState extends State<ProfileLandingPage> {
       if (response.statusCode == 200) {
         print('User data updated successfully');
       } else {
-        // Handle error
         print('Failed to update user data');
       }
     } catch (e) {
-      // Handle exception
       print('Error: $e');
     }
   }
@@ -96,16 +84,12 @@ class _ProfileLandingPageState extends State<ProfileLandingPage> {
         actions: [
           TextButton.icon(
             onPressed: () {
-              // Toggle the editing state
               setState(() {
                 isEditing = !isEditing;
               });
 
               if (!isEditing) {
-                // Save changes when switching from editing to non-editing state
                 saveChanges();
-
-                // Update user data on the backend
                 updateUserData();
               }
             },
@@ -114,16 +98,33 @@ class _ProfileLandingPageState extends State<ProfileLandingPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileField('Name', nameController, !isEditing),
-            _buildProfileField('Username', usernameController, !isEditing),
-            _buildProfileField('Email', emailController, !isEditing),
-            _buildProfileField('Password', passwordController, !isEditing),
-          ],
+      body: Container(
+        width: double
+            .infinity, // Set width to infinity to stretch to the right edge
+        color: isEditing ? Colors.white : null,
+        decoration: !isEditing
+            ? BoxDecoration(
+                image: DecorationImage(
+                  image:
+                      AssetImage('assets/images/profile_background_stock.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              )
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            color: Colors.white.withOpacity(0.8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildProfileField('Name', nameController, !isEditing),
+                _buildProfileField('Username', usernameController, !isEditing),
+                _buildProfileField('Email', emailController, !isEditing),
+                _buildProfileField('Password', passwordController, !isEditing),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -150,12 +151,15 @@ class _ProfileLandingPageState extends State<ProfileLandingPage> {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextFormField(
-                      controller: controller,
-                      readOnly: readOnly,
-                      obscureText: label == 'Password' && !showPassword,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                    Container(
+                      color: Colors.white,
+                      child: TextFormField(
+                        controller: controller,
+                        readOnly: readOnly,
+                        obscureText: label == 'Password' && !showPassword,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ),
                     SizedBox(height: 8.0),
@@ -188,7 +192,6 @@ class _ProfileLandingPageState extends State<ProfileLandingPage> {
   }
 
   void saveChanges() {
-    // Update the variables with the new values
     setState(() {
       name = nameController.text;
       username = usernameController.text;

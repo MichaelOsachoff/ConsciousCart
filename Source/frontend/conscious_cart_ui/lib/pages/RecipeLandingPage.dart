@@ -124,25 +124,40 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
 
   Widget _buildButton() {
     resetCreateRecipePage();
-    return SingleChildScrollView(
+    return Container(
+      height: MediaQuery.of(context)
+          .size
+          .height, // Set the height to the entire screen height
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/create_recipe_background_stock.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
       child: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _isFormVisible = true;
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.all(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('New Recipe', style: TextStyle(fontSize: 20)),
-              Icon(Icons.add, size: 30),
-            ],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _isFormVisible = true;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('New Recipe', style: TextStyle(fontSize: 20)),
+                  Icon(Icons.add, size: 30),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -204,9 +219,11 @@ class _RecipeLandingPageState extends State<RecipeLandingPage> {
                 Row(
                   children: [
                     Text('Total Waste Score: ',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
                     Text('$totalRecipeScoreString($totalRecipeScore)',
-                        style: TextStyle(color: totalRecipeScoreColour, fontSize: 18)),
+                        style: TextStyle(
+                            color: totalRecipeScoreColour, fontSize: 18)),
                   ],
                 ),
                 ElevatedButton(

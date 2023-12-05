@@ -19,7 +19,7 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
   bool hasFetched = false;
   int selectedRecipeIndex = -1;
 
-  //API CALLS
+  // API CALLS
   Future<void> fetchRecipes() async {
     try {
       final response = await http.get(
@@ -31,7 +31,6 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
 
         List<Recipe> fetchedRecipes = [];
         for (var recipeData in responseData) {
-          // Assuming there's a constructor in your Recipe class that takes a Map
           Recipe recipe = Recipe.fromMap(recipeData);
           fetchedRecipes.add(recipe);
         }
@@ -41,15 +40,13 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
         });
       } else {
         print('Failed to fetch recipes, status code: ${response.statusCode}');
-        // Handle the error
       }
     } catch (error) {
       print('Error fetching recipes: $error');
-      // Handle the error
     }
   }
 
-  //BUILDING FUNCTIONS
+  // BUILDING FUNCTIONS
   @override
   Widget build(BuildContext context) {
     if (selectedRecipeIndex == -1) {
@@ -68,68 +65,78 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
       appBar: AppBar(
         title: Text('Recipe History'),
       ),
-      body: ListView.builder(
-        itemCount: recipes.length,
-        itemBuilder: (context, index) {
-          final recipe = recipes[index];
-          return Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              children: [
-                // Score on the left
-                Container(
-                  margin: EdgeInsets.only(right: 16.0),
-                  child: RichText(
-                    text: TextSpan(
-                      text: '', // Placeholder for the whole text
-                      children: [
-                        TextSpan(
-                          text: '${recipe.totalRecipeScore}',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                            color: getScoreColor(recipe.totalRecipeScore),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/history_background_stock.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: ListView.builder(
+          itemCount: recipes.length,
+          itemBuilder: (context, index) {
+            final recipe = recipes[index];
+            return Container(
+              padding: EdgeInsets.all(8.0),
+              margin: EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8.0),
+                color:
+                    Colors.white.withOpacity(0.8), // Adjust opacity as needed
+              ),
+              child: Row(
+                children: [
+                  // Score on the left
+                  Container(
+                    margin: EdgeInsets.only(right: 16.0),
+                    child: RichText(
+                      text: TextSpan(
+                        text: '', // Placeholder for the whole text
+                        children: [
+                          TextSpan(
+                            text: '${recipe.totalRecipeScore}',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: getScoreColor(recipe.totalRecipeScore),
+                            ),
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Name and Date in a column in the center
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${recipe.recipeName}',
+                          style: TextStyle(
+                              fontSize: 16.0, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${recipe.formattedDate}',
+                          style: TextStyle(fontSize: 14.0),
                         ),
                       ],
                     ),
                   ),
-                ),
-                // Name and Date in a column in the center
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${recipe.recipeName}',
-                        style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        '${recipe.formattedDate}',
-                        style: TextStyle(fontSize: 14.0),
-                      ),
-                    ],
+                  // View button on the far-right side
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedRecipeIndex = index;
+                      });
+                    },
+                    child: Text('View'),
                   ),
-                ),
-                // View button on the far-right side
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedRecipeIndex = index;
-                    });
-                  },
-                  child: Text('View'),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -148,8 +155,8 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40, // Adjust the size as needed
-                height: 40, // Adjust the size as needed
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Theme.of(context).primaryColor,
@@ -352,12 +359,12 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
                           color: Colors.black),
                       children: <TextSpan>[
                     TextSpan(
-                      text: '${getScoreString(recipe.totalRecipeScore)}(${recipe.totalRecipeScore})',
+                      text:
+                          '${getScoreString(recipe.totalRecipeScore)}(${recipe.totalRecipeScore})',
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.normal,
-                        color: getScoreColor(recipe.totalRecipeScore)
-                      ),
+                          fontSize: 20,
+                          fontWeight: FontWeight.normal,
+                          color: getScoreColor(recipe.totalRecipeScore)),
                     ),
                   ])),
             ],
@@ -367,7 +374,7 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
     );
   }
 
-  //UTILITY FUNCTIONS
+  // UTILITY FUNCTIONS
   Color getScoreColor(double score) {
     if (score < 0) {
       return colourBad;
@@ -389,17 +396,11 @@ class _HistoryLandingPageState extends State<HistoryLandingPage> {
   }
 
   String formatPackagingString(String input) {
-    // Split the input string using ':'
     List<String> parts = input.split(':');
-
-    // Extract the second part and replace '-' with ' '
     String processedString =
         parts.length > 1 ? parts[1].replaceAll('-', ' ') : input;
-
-    // Capitalize the first letter of each word
     processedString = processedString.replaceAllMapped(
         RegExp(r'(?:^|\s)\S'), (match) => match.group(0)!.toUpperCase());
-
     return processedString;
   }
 
