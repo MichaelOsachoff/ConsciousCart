@@ -9,9 +9,10 @@ An application that allows home cooks to track, measure, and compare waste creat
 ## Project background/Business Opportunity
 There lacks an easy-to-use application for tracking and reducing a home cook’s waste based upon the recipes that they create.
 
-## Vlogs
+## Vlogs and Commerical
 Vlog 1 - [https://youtu.be/d-cPDdV7aPg](https://youtu.be/d-cPDdV7aPg)
 
+Commercial - [https://youtu.be/tQYGHQ32VUI](https://youtu.be/tQYGHQ32VUI)
 
 ## Technical Documentation
 Products are used from the Open Food Facts Project - [Link](https://world.openfoodfacts.org/)
@@ -77,4 +78,10 @@ Run the program:
 
     ```$ flutter run```
 
-6. You can now run and use the application, recipes can be created with searched products in the new recipe tab, previous recipes can be view in the history tab, and some basic user data can be viewed and edited in the profile tab.
+6. Note: the command from 4. may require developer settings to be enabled to allow plugins. For windows run the following command:
+
+    ```$ start ms-settings:developers```
+
+    Then turn on 'Developer Mode'.
+
+7. You can now run and use the application, recipes can be created with searched products in the new recipe tab, previous recipes can be view in the history tab, and some basic user data can be viewed and edited in the profile tab.
